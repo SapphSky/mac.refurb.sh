@@ -302,11 +302,9 @@ function choose_target_disk() {
   "${GUM_BINARY}" style --bold --padding 1 '(✔️)  ―――>  (2) Choose Target Disk  ―――>  (3)'
   
   # Show disk options using gum filter
-  CHOICE_TARGET_DISK=$((fetch_disk_options; echo "${BACK_OPTION}") | "${GUM_BINARY}" filter --header 'Select the disk to install MacOS to:')
+  CHOICE_TARGET_DISK=$((fetch_disk_options; echo "${BACK_OPTION}") | "${GUM_BINARY}" filter --header 'Select the disk to install MacOS to:' | cut -d' ' -f1)
 
   if [ "$CHOICE_TARGET_DISK" = "${BACK_OPTION}" ]; then
-    # Extract just the /dev/disk part before the space
-    CHOICE_TARGET_DISK=$(echo "$CHOICE_TARGET_DISK" | cut -d' ' -f1)
     choose_source_os
   else
     choose_post_installation_options
@@ -348,8 +346,7 @@ function confirm_installation() {
 function install_macos() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}"
-  "${GUM_BINARY}" style --foreground "#888888" "This is a dry run. No changes will be made to the system."
-  "${GUM_BINARY}" spin --spinner pulse --title "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}..." --show-output -- asr restore --source "${CHOICE_SOURCE_OS}" --target "${CHOICE_TARGET_DISK}" --erase --noprompt
+  asr restore --source "${CHOICE_SOURCE_OS}" --target "${CHOICE_TARGET_DISK}" --erase --noprompt
   if [ "$POST_INSTALLATION_OPTIONS" = "${CLEAR_NVRAM_OPTION}" ]; then
     "${GUM_BINARY}" spin --spinner pulse --title "Clearing NVRAM" --show-output -- $(reset_nvram)
   fi
