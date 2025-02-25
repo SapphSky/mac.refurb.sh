@@ -161,25 +161,31 @@ function download_macos_image() {
     CHOICE_DOWNLOAD_IMAGE_URL=$CATBOOT_IMAGE_URL
     CHOICE_DOWNLOAD_IMAGE_FILENAME=$CATBOOT_IMAGE_FILENAME
   fi
-  
+
+  choose_download_image_directory
+}
+
+function choose_download_image_directory() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Choose a directory to save the image:"
   CHOICE_DOWNLOAD_IMAGE_PATH=$("${GUM_BINARY}" file --directory "$STARTING_PATH" --show-help)
   if [ "$CHOICE_DOWNLOAD_IMAGE_PATH" = "no file selected" ]; then
     download_macos_image
   fi
+}
 
+function download_image() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Downloading ${CHOICE_DOWNLOAD_IMAGE_LABEL}... This may take some time."
   curl -L ${CHOICE_DOWNLOAD_IMAGE_URL} -o ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME}
 
   clear
   read -n 1 -s -r -p "Download complete: ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME} | Press any key to continue..."
+}
 
+function choose_image_scan() {
   clear
-  "${GUM_BINARY}" confirm --show-output "Would you like to scan the image now? (asr imagescan)" && asr imagescan ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME}
-
-  download_macos_image
+  "${GUM_BINARY}" confirm --show-output "Would you like to scan the image now? (asr imagescan)" && asr imagescan ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME} && download_macos_image || download_macos_image
 }
 
 function reset_nvram() {
@@ -301,10 +307,6 @@ function choose_target_disk() {
   if [ "$CHOICE_TARGET_DISK" = "${BACK_OPTION}" ]; then
     choose_source_os
   else
-    # Extract just the device path from the selection (everything before the pipe)
-    DEVICE_PATH=$(echo "$CHOICE_TARGET_DISK" | cut -d'|' -f1)
-    DEVICE_INFO=$(echo "$CHOICE_TARGET_DISK" | cut -d'|' -f2)
-    diskutil info "${DEVICE_PATH}"
     choose_post_installation_options
   fi
 }
@@ -346,12 +348,13 @@ function install_macos() {
   "${GUM_BINARY}" style --bold --padding 1 "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}"
   "${GUM_BINARY}" style --foreground "#888888" "This is a dry run. No changes will be made to the system."
   "${GUM_BINARY}" spin --spinner pulse --title "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}..." --show-output -- asr restore --source "${CHOICE_SOURCE_OS}" --target "${CHOICE_TARGET_DISK}" --erase --noprompt
-  if [ "$POST_INSTALLATION_OPTIONS" =~ "${CLEAR_NVRAM_OPTION}" ]; then
+  if [ "$POST_INSTALLATION_OPTIONS" = "${CLEAR_NVRAM_OPTION}" ]; then
     "${GUM_BINARY}" spin --spinner pulse --title "Clearing NVRAM" --show-output -- $(reset_nvram)
   fi
-  if [ "$POST_INSTALLATION_OPTIONS" =~ "${REBOOT_OPTION}" ]; then
-    "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- shutdown -r now
+  if [ "$POST_INSTALLATION_OPTIONS" = "${REBOOT_OPTION}" ]; then
+    "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- $(shutdown -r now)
   fi
+  exit 1
 }
 
 init
