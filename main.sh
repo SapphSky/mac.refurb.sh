@@ -3,6 +3,11 @@
 BACK_OPTION="Back"
 EXIT_OPTION="Exit"
 
+# gnu bash doesn't have a clear function, so we need to define our own
+function clear() {
+  printf "\033c"
+}
+
 function init() {
   # Detect architecture
   ARCH=$(uname -m)
@@ -166,7 +171,7 @@ function download_macos_image() {
 
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Downloading ${CHOICE_DOWNLOAD_IMAGE_LABEL}... This may take some time."
-  curl -L ${DRY_RUN_URL} -o ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME}
+  curl -L ${CHOICE_DOWNLOAD_IMAGE_URL} -o ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME}
 
   clear
   read -n 1 -s -r -p "Download complete: ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME} | Press any key to continue..."
@@ -179,8 +184,7 @@ function download_macos_image() {
 
 function reset_nvram() {
   clear
-  # "${GUM_BINARY}" spin --spinner dot --title "Clearing NVRAM..." -- nvram -c && pmset -a restoredefaults
-  "${GUM_BINARY}" spin --spinner dot --title "Clearing NVRAM..." --show-output -- sleep 1 && echo 'Done! (dry run)'
+  "${GUM_BINARY}" spin --spinner dot --title "Clearing NVRAM..." -- nvram -c && pmset -a restoredefaults
   sleep 1
   main_menu
 }
@@ -334,19 +338,19 @@ function confirm_installation() {
   "2. Target disk ${CHOICE_TARGET_DISK} and reformat it to 'Macintosh HD' (APFS format)" \
   "3. Perform asr restore to ${CHOICE_TARGET_DISK}"
 
-  "${GUM_BINARY}" confirm --show-output 'Are you sure you want to proceed?' && install_macos_dry || choose_target_disk
+  "${GUM_BINARY}" confirm --show-output 'Are you sure you want to proceed?' && install_macos || choose_target_disk
 }
 
-function install_macos_dry() {
+function install_macos() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}"
   "${GUM_BINARY}" style --foreground "#888888" "This is a dry run. No changes will be made to the system."
-  "${GUM_BINARY}" spin --spinner pulse --title "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}..." --show-output -- sleep 5 && echo "Restored image."
+  "${GUM_BINARY}" spin --spinner pulse --title "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}..." --show-output -- asr restore --source "${CHOICE_SOURCE_OS}" --target "${CHOICE_TARGET_DISK}" --erase --noprompt
   if [ "$POST_INSTALLATION_OPTIONS" =~ "${CLEAR_NVRAM_OPTION}" ]; then
-    "${GUM_BINARY}" spin --spinner pulse --title "Clearing NVRAM" --show-output -- sleep 5 && echo "NVRAM cleared."
+    "${GUM_BINARY}" spin --spinner pulse --title "Clearing NVRAM" --show-output -- $(reset_nvram)
   fi
   if [ "$POST_INSTALLATION_OPTIONS" =~ "${REBOOT_OPTION}" ]; then
-    "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- sleep 5 && echo "shutdown -r now"
+    "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- shutdown -r now
   fi
 }
 
