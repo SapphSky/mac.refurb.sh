@@ -305,6 +305,8 @@ function choose_target_disk() {
   CHOICE_TARGET_DISK=$((fetch_disk_options; echo "${BACK_OPTION}") | "${GUM_BINARY}" filter --header 'Select the disk to install MacOS to:')
 
   if [ "$CHOICE_TARGET_DISK" = "${BACK_OPTION}" ]; then
+    # Extract just the /dev/disk part before the space
+    CHOICE_TARGET_DISK=$(echo "$CHOICE_TARGET_DISK" | cut -d' ' -f1)
     choose_source_os
   else
     choose_post_installation_options
