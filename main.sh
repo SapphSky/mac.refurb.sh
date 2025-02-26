@@ -117,7 +117,7 @@ function main_menu() {
   CHOICE=$("${GUM_BINARY}" choose "$INSTALL_MACOS_OPTION" "$DOWNLOAD_MACOS_IMAGE_OPTION" "$RESET_NVRAM_OPTION" "$VIEW_DEVICE_INFO_OPTION" "$EXIT_OPTION" --header 'Select an option:')
 
   if [ "$CHOICE" = "$INSTALL_MACOS_OPTION" ]; then
-    choose_source_os
+    choose_source_os_from_file_picker
   elif [ "$CHOICE" = "$RESET_NVRAM_OPTION" ]; then
     reset_nvram
   elif [ "$CHOICE" = "$VIEW_DEVICE_INFO_OPTION" ]; then
@@ -278,14 +278,13 @@ function choose_source_os_from_file_picker() {
   STARTING_PATH="/Volumes"
   clear
 
-  "${GUM_BINARY}" style --bold --padding 1 'Select a .dmg Disk Image:'
+  "${GUM_BINARY}" style --bold --padding 1 '(1) Choose Source Image  ―――>  (2)  ―――>  (3)'
+  "${GUM_BINARY}" style --bold 'Select a .dmg Disk Image:'
   CHOICE_SOURCE_OS=$("${GUM_BINARY}" file "$STARTING_PATH" --file --show-help --size)
-  if [ "$CHOICE_SOURCE_OS" = "" ]; then
-    choose_source_os
-  elif [[ "${CHOICE_SOURCE_OS}" != *.dmg ]]; then
-    "${GUM_BINARY}" style --foreground "#ff0000" "Error: Please select a .dmg file"
-    sleep 2
-    choose_source_os
+  if [ "$CHOICE_SOURCE_OS" = "" || "${CHOICE_SOURCE_OS}" != *.dmg ]; then
+    choose_source_os_from_file_picker
+  else
+    choose_target_disk
   fi
 }
 
