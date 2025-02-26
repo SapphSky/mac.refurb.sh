@@ -390,10 +390,17 @@ function install_macos() {
   "${GUM_BINARY}" style --bold --padding 1 "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}"
   
   if [ "$DRY_RUN" = true ]; then
+    "${GUM_BINARY}" style --foreground "#yellow" "[DRY RUN] Would execute: diskutil eraseVolume APFS \"Macintosh HD\" \"${CHOICE_TARGET_DISK}\""
+    sleep 2
+  else
+    "${GUM_BINARY}" spin --spinner line --title "Formatting ${CHOICE_TARGET_DISK}..." -- $(diskutil eraseVolume APFS "Macintosh HD" "${CHOICE_TARGET_DISK}")
+  fi
+
+  if [ "$DRY_RUN" = true ]; then
     "${GUM_BINARY}" style --foreground "#yellow" "[DRY RUN] Would execute: asr restore --source \"${CHOICE_SOURCE_OS}\" --target \"${CHOICE_TARGET_DISK}\" --erase --noprompt"
     sleep 2
   else
-    asr restore --source "${CHOICE_SOURCE_OS}" --target "asr://refurb-sh.hel1.your-objectstorage.com/sources/${CHOICE_TARGET_DISK}.dmg" --erase --noprompt
+    asr restore --source "${CHOICE_SOURCE_OS}" --target "${CHOICE_TARGET_DISK}" --erase --noprompt
   fi
 
   if [[ "$POST_INSTALLATION_OPTIONS" == *"${CLEAR_NVRAM_OPTION}"* ]]; then
@@ -406,8 +413,7 @@ function install_macos() {
 
   if [[ "$POST_INSTALLATION_OPTIONS" == *"${REBOOT_OPTION}"* ]]; then
     if [ "$DRY_RUN" = true ]; then
-      "${GUM_BINARY}" style --foreground "#yellow" "[DRY RUN] Would execute: shutdown -r now"
-      sleep 2
+      "${GUM_BINARY}" spin --spinner pulse --title "[DRY RUN] Would execute: shutdown -r now" -- sleep 2
       exit 0
     else
       "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- $(shutdown -r now)
