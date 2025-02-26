@@ -376,11 +376,14 @@ function choose_post_installation_options() {
 function confirm_installation() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 'Confirm Operation'
-  "${GUM_BINARY}" style --bold --padding 1 'We will now perform the following operations:'
+  "${GUM_BINARY}" style 'We will now perform the following operations. Please confirm to proceed.'
   "${GUM_BINARY}" style --border rounded --padding 1 \
-  "1. Use source image for MacOS ${CHOICE_SOURCE_OS} installation" \
-  "2. Target disk ${CHOICE_TARGET_DISK} and reformat it to 'Macintosh HD' (APFS format)" \
-  "3. Perform asr restore to ${CHOICE_TARGET_DISK}"
+  "Source Image: ${CHOICE_SOURCE_OS}" \
+  "Target Disk: ${CHOICE_TARGET_DISK}" \
+  "1. Erase ${CHOICE_TARGET_DISK} and reformat it to 'Macintosh HD' (APFS format)" \
+  "2. Perform asr restore to ${CHOICE_TARGET_DISK}" \
+  $(if [ "$POST_INSTALLATION_OPTIONS" == *"${CLEAR_NVRAM_OPTION}"* ]; then echo "3. Clear NVRAM and SMC"; fi) \
+  $(if [ "$POST_INSTALLATION_OPTIONS" == *"${REBOOT_OPTION}"* ]; then echo "4. Reboot after installation"; fi)
 
   "${GUM_BINARY}" confirm --show-output 'Are you sure you want to proceed?' && install_macos || choose_target_disk
 }
