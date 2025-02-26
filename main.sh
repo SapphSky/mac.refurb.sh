@@ -232,9 +232,24 @@ function reset_nvram() {
 }
 
 function view_device_info() {
+  SYSTEM_PROFILER_PATH="/Volumes/OS X Base System/usr/sbin/system_profiler"
   clear
-  gum spin --title "Generating System Profiler Info..." -- system_profiler SPHardwareDataType SPMemoryDataType SPDisplaysDataType SPPowerDataType SPStorageDataType | gum pager
+  gum spin --title "Generating System Profiler Info..." -- "${SYSTEM_PROFILER_PATH}" SPHardwareDataType SPMemoryDataType SPDisplaysDataType SPPowerDataType SPStorageDataType | gum pager
   main_menu
+}
+
+function choose_source_image_mode() {
+  LOCAL_OPTION="Locally from external disk:Local"
+  ONLINE_OPTION="Online from refurb.sh (may take longer):Online"
+  CHOICE_SOURCE_IMAGE_MODE=$("${GUM_BINARY}" choose --header "Where should we source the image from?" --label-delimiter=":" "$LOCAL_OPTION" "$ONLINE_OPTION" ${BACK_OPTION} --selected "$LOCAL_OPTION")
+
+  if [ "$CHOICE_SOURCE_IMAGE_MODE" = "$BACK_OPTION" || "$CHOICE_SOURCE_IMAGE_MODE" = "" ]; then
+    main_menu
+  elif [ "$CHOICE_SOURCE_IMAGE_MODE" = "Local" ]; then
+    choose_source_os_from_file_picker
+  elif [ "$CHOICE_SOURCE_IMAGE_MODE" = "Online" ]; then
+    choose_source_os
+  fi
 }
 
 function choose_source_os() {
@@ -391,7 +406,7 @@ function confirm_installation() {
 function install_macos() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}"
-  
+
   if [ "$DRY_RUN" = true ]; then
     "${GUM_BINARY}" style --foreground "#yellow" "[DRY RUN] Would execute: diskutil eraseVolume APFS \"Macintosh HD\" \"${CHOICE_TARGET_DISK}\""
     sleep 2
