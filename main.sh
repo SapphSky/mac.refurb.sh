@@ -17,6 +17,13 @@ function clear() {
   printf "\033c"
 }
 
+function is_running_as_root() {
+  if [ "$EUID" -ne 0 ]; then
+    echo "Please run this script as root in MacOS Recovery Mode."
+    exit 1
+  fi
+}
+
 function init() {
   # Detect architecture
   ARCH=$(uname -m)
@@ -408,5 +415,6 @@ function install_macos() {
   fi
 }
 
+is_running_as_root
 init
 main_menu
