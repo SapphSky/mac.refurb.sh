@@ -201,8 +201,10 @@ function choose_download_image_directory() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Choose a directory to save the image:"
   CHOICE_DOWNLOAD_IMAGE_PATH=$("${GUM_BINARY}" file --directory "$STARTING_PATH" --show-help)
-  if [ "$CHOICE_DOWNLOAD_IMAGE_PATH" = "no file selected" ]; then
+  if [ "$CHOICE_DOWNLOAD_IMAGE_PATH" = "" ]; then
     download_macos_image
+  else
+    download_image
   fi
 }
 
