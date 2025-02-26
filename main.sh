@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Parse command line arguments
+DRY_RUN=false
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -dry|--dry-run) DRY_RUN=true; shift ;;
+    *) echo "Unknown parameter: $1"; exit 1 ;;
+  esac
+done
+
 BACK_OPTION="Back"
 EXIT_OPTION="Exit"
 
@@ -94,16 +103,18 @@ function main_menu() {
   BUILD_MACOS_IMAGE_OPTION='Build Disk Image' # TODO
 
   clear
-  ${GUM_BINARY} style --align left --bold --border rounded --padding 1 --width 40 'mac.refurb.sh' 'Version 2025.1'
+  ${GUM_BINARY} style --align left --bold --border rounded --padding 1 --width 40 'mac.refurb.sh' 'Version 2025.1' "$(if [ "$DRY_RUN" = true ]; then echo '[RUNNING IN DRY MODE -- NO ACTIONS WILL BE PERFORMED]'; fi)"
   ${GUM_BINARY} style --align left --padding 1 "$(message_of_the_day)"
 
   ${GUM_BINARY} style --underline 'Main Menu'
-  CHOICE=$("${GUM_BINARY}" choose "$INSTALL_MACOS_OPTION" "$DOWNLOAD_MACOS_IMAGE_OPTION" "$RESET_NVRAM_OPTION" "$EXIT_OPTION" --header 'Select an option:')
+  CHOICE=$("${GUM_BINARY}" choose "$INSTALL_MACOS_OPTION" "$DOWNLOAD_MACOS_IMAGE_OPTION" "$RESET_NVRAM_OPTION" "$VIEW_DEVICE_INFO_OPTION" "$EXIT_OPTION" --header 'Select an option:')
 
   if [ "$CHOICE" = "$INSTALL_MACOS_OPTION" ]; then
     choose_source_os
   elif [ "$CHOICE" = "$RESET_NVRAM_OPTION" ]; then
     reset_nvram
+  elif [ "$CHOICE" = "$VIEW_DEVICE_INFO_OPTION" ]; then
+    view_device_info
   elif [ "$CHOICE" = "$DOWNLOAD_MACOS_IMAGE_OPTION" ]; then
     download_macos_image
   elif [ "$CHOICE" = "$EXIT_OPTION" ]; then
@@ -130,27 +141,41 @@ function download_macos_image() {
   # MONTEREY_IMAGE_FILENAME="Monterey_12.7.4.dmg"
   # MONTEREY_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Monterey_12.7.4.dmg"
 
-  # VENTURA_IMAGE_LABEL="Ventura 13.7.4 - 10.5 GB"
-  # VENTURA_IMAGE_FILENAME="Ventura_13.7.4.dmg"
-  # VENTURA_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Ventura_13.7.4.dmg"
+  VENTURA_IMAGE_LABEL="Ventura 13.7.3 - 18.2 GB"
+  VENTURA_IMAGE_FILENAME="Ventura_13.7.3.dmg"
+  VENTURA_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Ventura_13.7.3.dmg"
 
-  # SONOMA_IMAGE_LABEL="Sonoma 14.7.4 - 10.5 GB"
-  # SONOMA_IMAGE_FILENAME="Sonoma_14.7.4.dmg"
-  # SONOMA_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Sonoma_14.7.4.dmg"
+  SONOMA_IMAGE_LABEL="Sonoma 14.7.2 - 13.2 GB"
+  SONOMA_IMAGE_FILENAME="Sonoma_14.7.2.dmg"
+  SONOMA_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Sonoma_14.7.2.dmg"
 
-  # SEQUOIA_IMAGE_LABEL="Sequoia 15.3.1 - 10.5 GB"
-  # SEQUOIA_IMAGE_FILENAME="Sequoia_15.3.1.dmg"
-  # SEQUOIA_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Sequoia_15.3.1.dmg"
-
-  DRY_RUN_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/dummy.png"
+  SEQUOIA_IMAGE_LABEL="Sequoia 15.2 - 14.1 GB"
+  SEQUOIA_IMAGE_FILENAME="Sequoia_15.2.dmg"
+  SEQUOIA_IMAGE_URL="https://refurb-sh.hel1.your-objectstorage.com/sources/Sequoia_15.2.dmg"
 
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Disk Images"
 
-  CHOICE_DOWNLOAD_IMAGE=$("${GUM_BINARY}" filter "$CATALINA_IMAGE_LABEL" "$CATBOOT_IMAGE_LABEL" ${BACK_OPTION} --header 'Select a disk image to download:')
+  CHOICE_DOWNLOAD_IMAGE=$("${GUM_BINARY}" filter "$SEQUOIA_IMAGE_LABEL" "$SONOMA_IMAGE_LABEL" "$VENTURA_IMAGE_LABEL" "$CATALINA_IMAGE_LABEL" "$CATBOOT_IMAGE_LABEL" ${BACK_OPTION} --header 'Select a disk image to download:')
 
   if [ "$CHOICE_DOWNLOAD_IMAGE" = "$BACK_OPTION" ]; then
     main_menu
+
+  elif [ "$CHOICE_DOWNLOAD_IMAGE" = "$SEQUOIA_IMAGE_LABEL" ]; then
+    CHOICE_DOWNLOAD_IMAGE_LABEL=$SEQUOIA_IMAGE_LABEL
+    CHOICE_DOWNLOAD_IMAGE_URL=$SEQUOIA_IMAGE_URL
+    CHOICE_DOWNLOAD_IMAGE_FILENAME=$SEQUOIA_IMAGE_FILENAME
+
+  elif [ "$CHOICE_DOWNLOAD_IMAGE" = "$SONOMA_IMAGE_LABEL" ]; then
+    CHOICE_DOWNLOAD_IMAGE_LABEL=$SONOMA_IMAGE_LABEL
+    CHOICE_DOWNLOAD_IMAGE_URL=$SONOMA_IMAGE_URL
+    CHOICE_DOWNLOAD_IMAGE_FILENAME=$SONOMA_IMAGE_FILENAME
+
+  elif [ "$CHOICE_DOWNLOAD_IMAGE" = "$VENTURA_IMAGE_LABEL" ]; then
+    CHOICE_DOWNLOAD_IMAGE_LABEL=$VENTURA_IMAGE_LABEL
+    CHOICE_DOWNLOAD_IMAGE_URL=$VENTURA_IMAGE_URL
+    CHOICE_DOWNLOAD_IMAGE_FILENAME=$VENTURA_IMAGE_FILENAME
+  
   elif [ "$CHOICE_DOWNLOAD_IMAGE" = "$CATALINA_IMAGE_LABEL" ]; then
     CHOICE_DOWNLOAD_IMAGE_LABEL=$CATALINA_IMAGE_LABEL
     CHOICE_DOWNLOAD_IMAGE_URL=$CATALINA_IMAGE_URL
@@ -190,8 +215,18 @@ function choose_image_scan() {
 
 function reset_nvram() {
   clear
-  "${GUM_BINARY}" spin --spinner dot --title "Clearing NVRAM..." -- nvram -c && pmset -a restoredefaults
+  if [ "$DRY_RUN" = true ]; then
+    "${GUM_BINARY}" spin --spinner dot --title "[DRY RUN] Simulating NVRAM clear..." -- sleep 1
+  else
+    "${GUM_BINARY}" spin --spinner dot --title "Clearing NVRAM..." -- nvram -c && pmset -a restoredefaults
+  fi
   sleep 1
+  main_menu
+}
+
+function view_device_info() {
+  clear
+  gum spin --title "Generating System Profiler Info..." -- system_profiler SPHardwareDataType SPMemoryDataType SPDisplaysDataType SPPowerDataType SPStorageDataType | gum pager
   main_menu
 }
 
@@ -208,7 +243,7 @@ function choose_source_os() {
   "${GUM_BINARY}" style --bold --padding 1 '(1) Choose Operating System  ―――>  (2)  ―――>  (3)'
   CHOICE_SOURCE_OS=$("${GUM_BINARY}" filter "$SEQUOIA" "$SONOMA" "$VENTURA" "$MONTEREY" "$BIG_SUR" "$CATALINA" "$CUSTOM" ${BACK_OPTION} --header 'Select the MacOS version to install:')
 
-  if [ "$CHOICE_SOURCE_OS" = "$BACK_OPTION" ]; then
+  if [ "$CHOICE_SOURCE_OS" = "$BACK_OPTION" || "$CHOICE_SOURCE_OS" = "" ]; then
     main_menu
   elif [ "$CHOICE_SOURCE_OS" = "$CUSTOM" ]; then
     choose_source_os_from_file_picker
@@ -223,7 +258,7 @@ function choose_source_os_from_file_picker() {
 
   "${GUM_BINARY}" style --bold --padding 1 'Select a .dmg Disk Image:'
   CHOICE_SOURCE_OS=$("${GUM_BINARY}" file "$STARTING_PATH" --file --show-help --size)
-  if [ "$CHOICE_SOURCE_OS" = "no file selected" ]; then
+  if [ "$CHOICE_SOURCE_OS" = "" ]; then
     choose_source_os
   elif [[ "${CHOICE_SOURCE_OS}" != *.dmg ]]; then
     "${GUM_BINARY}" style --foreground "#ff0000" "Error: Please select a .dmg file"
@@ -304,7 +339,7 @@ function choose_target_disk() {
   # Show disk options using gum filter
   CHOICE_TARGET_DISK=$((fetch_disk_options; echo "${BACK_OPTION}") | "${GUM_BINARY}" filter --header 'Select the disk to install MacOS to:' | cut -d' ' -f1)
 
-  if [ "$CHOICE_TARGET_DISK" = "${BACK_OPTION}" ]; then
+  if [ "$CHOICE_TARGET_DISK" = "${BACK_OPTION}" || "$CHOICE_TARGET_DISK" = "" ]; then
     choose_source_os
   else
     choose_post_installation_options
@@ -346,14 +381,31 @@ function confirm_installation() {
 function install_macos() {
   clear
   "${GUM_BINARY}" style --bold --padding 1 "Installing ${CHOICE_SOURCE_OS} to ${CHOICE_TARGET_DISK}"
-  asr restore --source "${CHOICE_SOURCE_OS}" --target "${CHOICE_TARGET_DISK}" --erase --noprompt
-  if [ "$POST_INSTALLATION_OPTIONS" = "${CLEAR_NVRAM_OPTION}" ]; then
-    "${GUM_BINARY}" spin --spinner pulse --title "Clearing NVRAM" --show-output -- $(reset_nvram)
+  
+  if [ "$DRY_RUN" = true ]; then
+    "${GUM_BINARY}" style --foreground "#yellow" "[DRY RUN] Would execute: asr restore --source \"${CHOICE_SOURCE_OS}\" --target \"${CHOICE_TARGET_DISK}\" --erase --noprompt"
+    sleep 2
+  else
+    asr restore --source "${CHOICE_SOURCE_OS}" --target "asr://refurb-sh.hel1.your-objectstorage.com/sources/${CHOICE_TARGET_DISK}.dmg" --erase --noprompt
   fi
-  if [ "$POST_INSTALLATION_OPTIONS" = "${REBOOT_OPTION}" ]; then
-    "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- $(shutdown -r now)
+
+  if [[ "$POST_INSTALLATION_OPTIONS" == *"${CLEAR_NVRAM_OPTION}"* ]]; then
+    if [ "$DRY_RUN" = true ]; then
+      "${GUM_BINARY}" spin --spinner pulse --title "[DRY RUN] Simulating NVRAM clear..." -- sleep 2
+    else
+      "${GUM_BINARY}" spin --spinner pulse --title "Clearing NVRAM" --show-output -- $(reset_nvram)
+    fi
   fi
-  exit 1
+
+  if [[ "$POST_INSTALLATION_OPTIONS" == *"${REBOOT_OPTION}"* ]]; then
+    if [ "$DRY_RUN" = true ]; then
+      "${GUM_BINARY}" style --foreground "#yellow" "[DRY RUN] Would execute: shutdown -r now"
+      sleep 2
+      exit 0
+    else
+      "${GUM_BINARY}" spin --spinner pulse --title "Performing reboot now. Goodbye!" --show-output -- $(shutdown -r now)
+    fi
+  fi
 }
 
 init
