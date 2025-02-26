@@ -215,6 +215,7 @@ function download_image() {
 
   clear
   read -n 1 -s -r -p "Download complete: ${CHOICE_DOWNLOAD_IMAGE_PATH}/${CHOICE_DOWNLOAD_IMAGE_FILENAME} | Press any key to continue..."
+  choose_image_scan
 }
 
 function choose_image_scan() {
