@@ -33,25 +33,25 @@ main_menu () {
 
   case "$choice" in
     "install")
-      clear && sh ./restore_disk_image.sh && main_menu
+      sh ./restore_disk_image.sh && main_menu
       ;;
     "manage_images")
-      clear && sh ./disk_image_manager.sh && main_menu
+      sh ./disk_image_manager.sh && main_menu
       ;;
     "reset_nvram")
-      clear && sh ./reset_nvram.sh && main_menu
+      sh ./reset_nvram.sh && main_menu
       ;;
     "device_info")
-      clear && sh ./view_device_info.sh && main_menu
+      sh ./view_device_info.sh && main_menu
       ;;
     "exit")
-      clear && echo "INFO" "Exiting program, goodbye!" && exit 0
+      echo "INFO" "Exiting program, goodbye!" && exit 0
       ;;
   esac
 }
 
 _main () {
-  clear && main_menu
+  main_menu
 }
 
 _main
