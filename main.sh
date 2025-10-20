@@ -23,5 +23,5 @@ if ! tar -xzf "${tmpdir}/mac.refurb.sh.zip" -C "${tmpdir}"; then
   echo "ERROR" "Failed to extract repository"
   exit 1
 fi
-open ${tmpdir}
+
 sh "${tmpdir}/mac.refurb.sh-main/entrypoint.sh"
