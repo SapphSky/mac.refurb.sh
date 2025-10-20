@@ -75,7 +75,6 @@ fi
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
 asr_exit_code=0
-"${gum}" spin --spinner points --title "Restoring ${source_image} to ${target_disk}" --show-output -- \
 asr restore --source "$source_image" --target "$target_disk" --erase --noprompt || asr_exit_code=$?
 
 # Handle ASR exit codes
