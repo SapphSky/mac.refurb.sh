@@ -75,9 +75,8 @@ fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
-diskutil eraseDisk APFS "Target Restore Volume" "$target_disk"
-sleep 1
-asr restore --source "$source_image" --target "${target_disk}s2" --erase --noprompt
+# diskutil eraseDisk APFS "Target Restore Volume" "$target_disk"
+asr restore --source "$source_image" --target "${target_disk}" --erase --noprompt --verbose
 
 # Perform post-restore options
 case $post_restore_options in
