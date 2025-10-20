@@ -1,0 +1,68 @@
+{
+  "disk_images": [
+    {
+      "display_name": "CatBoot 2025",
+      "version": "3.0",
+      "filename": "Catboot_2025.dmg",
+      "checksum": "303bc9f389d68fbc586db7c48ede4731-1001",
+      "available": true,
+      "tags": ["x86_64", "testing"]
+    },
+    {
+      "display_name": "Catalina",
+      "version": "10.15.7",
+      "filename": "Catalina_10.15.7.dmg",
+      "checksum": "fb79baa8aeecb3a79487e720254bbc4e-1001",
+      "available": true,
+      "tags": ["x86_64"]
+    },
+    {
+      "display_name": "Big Sur",
+      "version": "11.7.10",
+      "filename": "BigSur_11.7.10.dmg",
+      "checksum": null,
+      "available": false,
+      "tags": ["x86_64", "arm64"]
+    },
+    {
+      "display_name": "Monterey",
+      "version": "12.7.4",
+      "filename": "Monterey_12.7.4.dmg",
+      "checksum": null,
+      "available": false,
+      "tags": ["x86_64", "arm64"]
+    },
+    {
+      "display_name": "Ventura",
+      "version": "13.7.8",
+      "filename": "Ventura_13.7.8.dmg",
+      "checksum": null,
+      "available": false,
+      "tags": ["x86_64", "arm64"]
+    },
+    {
+      "display_name": "Sonoma",
+      "version": "14.8",
+      "filename": "Sonoma_14.8.dmg",
+      "checksum": null,
+      "available": false,
+      "tags": ["x86_64", "arm64"]
+    },
+    {
+      "display_name": "Sequoia",
+      "version": "15.7",
+      "filename": "Sequoia_15.7.1.dmg",
+      "checksum": "4b879081b956e260c852899e40b891d0-1415",
+      "available": true,
+      "tags": ["x86_64", "arm64"]
+    },
+    {
+      "display_name": "Tahoe",
+      "version": "26.0",
+      "filename": "Tahoe_26.0.dmg",
+      "checksum": null,
+      "available": false,
+      "tags": ["x86_64", "arm64"]
+    }
+  ]
+}
