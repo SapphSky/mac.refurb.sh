@@ -67,7 +67,12 @@ confirm=$("${gum}" confirm \
 "Are you sure you want to proceed? This action cannot be undone." \
 --default="false" \
 --affirmative="Confirm" \
---negative="Cancel" \
+--negative="Cancel")
+
+if [[ "$confirm" != "true" ]]; then
+  echo "INFO" "Operation cancelled by user"
+  exit 0
+fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
@@ -85,7 +90,7 @@ case $asr_exit_code in
 esac
 
 # Perform post-restore options
-case "$post_restore_options" in
+case $post_restore_options in
   "Clear NVRAM and SMC")
     clear_nvram
     ;;
