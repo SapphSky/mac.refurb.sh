@@ -74,22 +74,12 @@ fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
-asr_exit_code=0
-asr restore --source "$source_image" --target "$target_disk" --erase --noprompt || asr_exit_code=$?
-
-# Handle ASR exit codes
-case $asr_exit_code in
-  *)
-    echo "WARNING" "ASR completed with exit code: $asr_exit_code."
-    echo "INFO" "Restoration may have succeeded despite the warning."
-    sleep 5
-    ;;
-esac
+asr restore --source "$source_image" --target "$target_disk" --erase --noprompt
 
 # Perform post-restore options
 case $post_restore_options in
   "Clear NVRAM and SMC")
-    clear_nvram
+    sh ./reset_nvram.sh
     ;;
   "Reboot after installation")
     reboot
