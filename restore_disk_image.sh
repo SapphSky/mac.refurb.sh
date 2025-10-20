@@ -59,6 +59,7 @@ post_restore_options=$("${gum}" choose --header "Choose post-restore options:" -
 
 # Confirm choices
 "${gum}" style --bold --padding 1 "Confirm disk restoration operation"
+"${gum}" style "I am about to run \"asr restore\" with the following parameters:"
 "${gum}" style "Source Disk Image: $source_image"
 "${gum}" style "Restore Target Disk: $target_disk"
 "${gum}" style "Post-restore options: $post_restore_options"
@@ -74,7 +75,8 @@ fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
-asr restore --source "$source_image" --target "$target_disk" --erase --noprompt
+diskutil eraseDisk APFS "Target Restore Volume" "$target_disk"
+asr restore --source "$source_image" --target "/Volumes/Target Restore Volume" --erase --noprompt
 
 # Perform post-restore options
 case $post_restore_options in
