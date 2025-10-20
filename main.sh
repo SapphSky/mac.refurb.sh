@@ -24,4 +24,6 @@ if ! tar -xzf "${tmpdir}/mac.refurb.sh.zip" -C "${tmpdir}"; then
   exit 1
 fi
 
-sh "${tmpdir}/mac.refurb.sh-main/entrypoint.sh"
+cd "${tmpdir}/mac.refurb.sh-main"
+sh ./entrypoint.sh
+exit 0
