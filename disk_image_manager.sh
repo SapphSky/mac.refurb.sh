@@ -8,7 +8,7 @@ readonly disk_image_manifest="${disk_image_repository}manifest.json"
 
 fetch_local_disk_images () {
   # echo "INFO" "Scanning for local disk images... This may take a while."
-  # gum spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
+  # "${gum}" spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
   disk_images=$(find / \
     -path "/Volumes/Macintosh HD" -prune -o \
     -path "/Applications" -prune -o \
@@ -34,13 +34,13 @@ fetch_remote_disk_images () {
 }
 
 pick_remote_disk_image () {
-  local choice=$(fetch_remote_disk_images | gum choose --header "Select a disk image to download:" --label-delimiter ":")
+  local choice=$(fetch_remote_disk_images | "${gum}" choose --header "Select a disk image to download:" --label-delimiter ":")
   download_disk_image "$choice"
   return 0
 }
 
 pick_local_disk_image () {
-  local choice=$(fetch_local_disk_images | gum choose --header "Select a disk image:")
+  local choice=$(fetch_local_disk_images | "${gum}" choose --header "Select a disk image:")
   echo "$choice"
   return 0
 }
@@ -53,8 +53,8 @@ scan_disk_image () {
 download_disk_image () {
   local filename="$1"
   local download_url="${disk_image_repository}${filename}"
-  local destination="$(gum file /Volumes --directory --header "Select a directory to save ${filename} to:")"
-  gum spin --spinner globe --title "Downloading ${filename} to ${destination}/${filename}" -- \
+  local destination="$("${gum}" file /Volumes --directory --header "Select a directory to save ${filename} to:")"
+  "${gum}" spin --spinner globe --title "Downloading ${filename} to ${destination}/${filename}" -- \
   curl "$download_url" --connect-timeout 30 --progress-bar --retry 5 --output "${destination}/${filename}"
   scan_disk_image "${destination}/${filename}"
   return 0
@@ -68,7 +68,7 @@ disk_images_menu () {
   )
   choices=$(printf "%s\n" "${choices[@]}")
 
-  local choice=$(echo "${choices}" | gum choose --header 'Disk Image Manager' --label-delimiter ":")
+  local choice=$(echo "${choices}" | "${gum}" choose --header 'Disk Image Manager' --label-delimiter ":")
 
   case "$choice" in
     "list")

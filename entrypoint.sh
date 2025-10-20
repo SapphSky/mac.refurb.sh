@@ -12,7 +12,7 @@ fi
 source ./bootstrap.sh
 
 main_menu () {
-  gum style \
+  "${gum}" style \
   --align center \
   --bold \
   --border rounded \
@@ -29,7 +29,7 @@ main_menu () {
   )
   choices=$(printf "%s\n" "${choices[@]}")
 
-  local choice=$(echo "${choices}" | gum choose --header "Main Menu" --label-delimiter ":")
+  local choice=$(echo "${choices}" | "${gum}" choose --header "Main Menu" --label-delimiter ":")
 
   case "$choice" in
     "install")

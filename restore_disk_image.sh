@@ -24,7 +24,7 @@ human_readable_size () {
 
 # Fetch local disk images
 echo "INFO" "Scanning for local disk images... This may take a while."
-# gum spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
+# "${gum}" spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
 disk_images=$(find / \
   -path "/Volumes/Macintosh HD" -prune -o \
   -path "/Applications" -prune -o \
@@ -41,7 +41,7 @@ if [[ -z "$disk_images" ]]; then
 fi
 
 # Select source disk image
-source_image=$(echo "$disk_images" | gum choose --header "Select a source disk image to restore:")
+source_image=$(echo "$disk_images" | "${gum}" choose --header "Select a source disk image to restore:")
 
 # Fetch local disk drives
 echo "INFO" "Scanning for local disk drives..."
@@ -49,21 +49,21 @@ device_disks=($(for disk in $(diskutil list internal physical | grep -E "^/dev/d
 device_disks=($(printf '%s\0' "${device_disks[@]}" | tr '\0' '\n'))
 
 # Select target disk drive
-target_disk=$(echo "${device_disks[@]}" | gum choose --header "Select a target disk to:" --label-delimiter "//")
+target_disk=$(echo "${device_disks[@]}" | "${gum}" choose --header "Select a target disk to:" --label-delimiter "//")
 
 # Choose post-restore options
-post_restore_options=$(gum choose --header "Choose post-restore options:" --no-limit --selected="*" \
+post_restore_options=$("${gum}" choose --header "Choose post-restore options:" --no-limit --selected="*" \
   "Clear NVRAM and SMC" \
   "Reboot after installation" \
 )
 
 # Confirm choices
-gum style --bold --padding 1 "Confirm disk restoration operation"
-gum style "Source Disk Image: $source_image"
-gum style "Restore Target Disk: $target_disk"
-gum style "Post-restore options: $post_restore_options"
+"${gum}" style --bold --padding 1 "Confirm disk restoration operation"
+"${gum}" style "Source Disk Image: $source_image"
+"${gum}" style "Restore Target Disk: $target_disk"
+"${gum}" style "Post-restore options: $post_restore_options"
 
-confirm=$(gum confirm \
+confirm=$("${gum}" confirm \
 "Are you sure you want to proceed? This action cannot be undone." \
 --default="false" \
 --affirmative="Confirm" \
@@ -72,7 +72,7 @@ confirm=$(gum confirm \
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
 asr_exit_code=0
-gum spin --spinner points --title "Restoring ${source_image} to ${target_disk}" --show-output -- \
+"${gum}" spin --spinner points --title "Restoring ${source_image} to ${target_disk}" --show-output -- \
 asr restore --source "$source_image" --target "$target_disk" --erase --noprompt || asr_exit_code=$?
 
 # Handle ASR exit codes
