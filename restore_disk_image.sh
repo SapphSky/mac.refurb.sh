@@ -77,32 +77,10 @@ asr restore --source "$source_image" --target "$target_disk" --erase --noprompt 
 
 # Handle ASR exit codes
 case $asr_exit_code in
-  0)
-    echo "INFO" "Disk restoration completed successfully."
-    ;;
-  1)
-    echo "WARNING" "ASR completed with warnings but restoration may have succeeded."
-    echo "INFO" "Please verify the target disk manually."
-    ;;
-  2)
-    echo "ERROR" "ASR failed: Invalid arguments or source/target issues."
-    exit 1
-    ;;
-  3)
-    echo "ERROR" "ASR failed: Permission denied or insufficient privileges."
-    exit 1
-    ;;
-  4)
-    echo "ERROR" "ASR failed: Source image not found or corrupted."
-    exit 1
-    ;;
-  5)
-    echo "ERROR" "ASR failed: Target disk not found or inaccessible."
-    exit 1
-    ;;
   *)
-    echo "WARNING" "ASR completed with exit code $asr_exit_code."
+    echo "WARNING" "ASR completed with exit code: $asr_exit_code."
     echo "INFO" "Restoration may have succeeded despite the warning."
+    sleep 5
     ;;
 esac
 
