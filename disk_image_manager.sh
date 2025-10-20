@@ -80,7 +80,7 @@ disk_images_menu () {
     ;;
 
     "scan")
-    scan_disk_image $(pick_local_disk_image) && disk_images_menu
+    scan_disk_image "$(pick_local_disk_image)" && disk_images_menu
     ;;
   esac
 }
