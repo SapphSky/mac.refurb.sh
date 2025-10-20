@@ -63,14 +63,12 @@ post_restore_options=$("${gum}" choose --header "Choose post-restore options:" -
 "${gum}" style "Restore Target Disk: $target_disk"
 "${gum}" style "Post-restore options: $post_restore_options"
 
-confirm=$("${gum}" confirm \
+if ! "${gum}" confirm \
 "Are you sure you want to proceed? This action cannot be undone." \
 --default="false" \
 --affirmative="Confirm" \
---negative="Cancel")
-
-if [[ "$confirm" != "true" ]]; then
-  echo "INFO" "Operation cancelled by user"
+--negative="Cancel"; then
+  echo "INFO" "User cancelled disk restoration."
   exit 0
 fi
 
