@@ -53,7 +53,7 @@ scan_disk_image () {
 download_disk_image () {
   local filename="$1"
   local download_url="${disk_image_repository}${filename}"
-  local destination="$("${gum}" file /Volumes --directory --header "Select a directory to save ${filename} to:")"
+  local destination="$("${gum}" file /Volumes --directory --header "Select a directory to save ${filename} to:" --padding="1 0 0 0")"
   "${gum}" spin --spinner globe --title "Downloading ${filename} to ${destination}/${filename}" --show-output -- \
   curl "$download_url" --connect-timeout 30 --progress-bar --retry 5 --output "${destination}/${filename}"
   scan_disk_image "${destination}/${filename}"
