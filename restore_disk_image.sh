@@ -86,10 +86,10 @@ fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
-echo "INFO" "ASR Restore  |  Source: $source_image  |  Target: $target_disk"
+echo "INFO" "ASR Restore  |  Source: $source_image  |  Target: $target_disk (/Volumes/Macintosh HD)"
 diskutil eraseDisk APFS "Macintosh HD" "$target_disk"
 diskutil mountDisk "$target_disk"
-asr restore --source "$source_image" --sourcevolumename "Macintosh HD" --target "/Volumes/Macintosh HD" --erase --noprompt
+asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
 
 # Perform post-restore options
 case $post_restore_options in
