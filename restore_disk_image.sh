@@ -31,6 +31,17 @@ disk_images=$(find / \
   -path "/Library" -prune -o \
   -path "/System" -prune -o \
   -path "/Users" -prune -o \
+  -path "/macOS Base System" -prune -o \
+  -path "/tmp" -prune -o \
+  -path "/bin" -prune -o \
+  -path "/cores" -prune -o \
+  -path "/etc" -prune -o \
+  -path "/opt" -prune -o \
+  -path "/private" -prune -o \
+  -path "/sbin" -prune -o \
+  -path "/usr" -prune -o \
+  -path "/var" -prune -o \
+  -path "/Users" -prune -o \
   -type f -name '*.dmg' -print0 \
   2>/dev/null | tr '\0' '\n' || true)
 disk_images=$(printf '%s\n' "$disk_images")
