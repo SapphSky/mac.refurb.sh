@@ -75,8 +75,7 @@ fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
-diskutil eraseDisk APFS "Target Volume" "$target_disk"
-asr restore --source "$source_image" --target "/Volumes/Target Volume" --erase --noprompt --verbose
+asr restore --source "$source_image" --sourcevolumename "Macintosh HD" --target "$target_disk" --erase --noprompt --verbose
 
 # Perform post-restore options
 case $post_restore_options in
