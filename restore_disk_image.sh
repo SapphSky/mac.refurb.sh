@@ -22,6 +22,16 @@ human_readable_size () {
     {sub(/^[0-9]+/, human($1)); print}'
 }
 
+check_asr_version () {
+  version=$(asr --version)
+  if [[ $version == "asr: version 622" ]]; then
+    echo "ERROR" "ASR version 622 is broken and cannot restore disk images. Please use another version of ASR."
+    exit 1
+  fi
+}
+
+check_asr_version
+
 # Fetch local disk images
 echo "INFO" "Scanning for local disk images... This may take a while."
 # "${gum}" spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
