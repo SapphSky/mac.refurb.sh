@@ -45,7 +45,8 @@ if ! curl -L --connect-timeout 30 --retry 2 --retry-delay 3 \
 fi
 
 # Mount miau.dmg
-diskutil mount "${tmpdir}/miau.dmg"
-
+echo "INFO" "Mounting miau.dmg..."
+hdiutil attach "${tmpdir}/miau.dmg" -quiet
 echo "INFO" "miau.dmg mounted successfully"
+
 return
