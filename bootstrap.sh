@@ -41,7 +41,7 @@ echo "INFO" "gum installed successfully"
 if [[ -d "/Volumes/miau" ]]; then
   echo "INFO" "miau volume is already mounted"
   export miau="/Volumes/miau"
-  exit 0
+  return 0
 fi
 
 echo "INFO" "Downloading miau.dmg..."
