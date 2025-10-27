@@ -22,6 +22,26 @@ human_readable_size () {
     {sub(/^[0-9]+/, human($1)); print}'
 }
 
+echo "INFO" "Checking OS compatability..."
+ioreg_output=$(ioreg -l 2>/dev/null || true)
+model=$(echo "$ioreg_output" | (grep ModelNumber -m 1 2>/dev/null || true) | awk -F'"' '{print $4}' || echo "")
+
+if [[ -f "compatability.csv" ]] && [[ -n "$model" ]]; then
+  compatability=$(grep -s "\"$model\"" compatability.csv 2>/dev/null | awk -F',' '{print $2, $3}' || true)
+  
+  if [[ -z "$compatability" ]]; then
+    echo "WARNING" "No compatability data found for ${model}."
+    echo "Please be aware of the compatible OS versions for this model."
+  else
+    min_version=$(echo "$compatability" | awk '{print $1}')
+    max_version=$(echo "$compatability" | awk '{print $2}')
+    echo "INFO" "Minimum OS version: ${min_version}"
+    echo "INFO" "Maximum OS version: ${max_version}"
+  fi
+else
+  echo "WARNING" "Could not determine model or compatability.csv not found."
+fi
+
 # Fetch local disk images
 echo "INFO" "Scanning for local disk images... This may take a while."
 # "${gum}" spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
