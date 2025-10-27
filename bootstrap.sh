@@ -5,6 +5,7 @@ readonly gum_version="0.17.0"
 readonly arch=$(uname -m)
 readonly gum_package="gum_${gum_version}_Darwin_${arch}.tar.gz"
 readonly gum_url="https://github.com/charmbracelet/gum/releases/download/v${gum_version}/${gum_package}"
+readonly miau_dmg_url="https://dl.refurb.sh/assets/miau.dmg"
 
 if [[ -z "$tmpdir" ]]; then
   tmpdir=$(mktemp -d) || {
@@ -35,4 +36,16 @@ chmod +x "${gum}" || {
 }
 
 echo "INFO" "gum installed successfully"
+
+echo "INFO" "Downloading miau.dmg..."
+if ! curl -L --connect-timeout 30 --retry 2 --retry-delay 3 \
+      --progress-bar "${miau_dmg_url}" -o "${tmpdir}/miau.dmg"; then
+  echo "ERROR" "Failed to download miau.dmg"
+  exit 1
+fi
+
+# Mount miau.dmg
+diskutil mount "${tmpdir}/miau.dmg"
+
+echo "INFO" "miau.dmg mounted successfully"
 return
