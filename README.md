@@ -15,5 +15,5 @@ mac.refurb.sh is a standalone script that can be run from the command line.
 
 ### Usage
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/SapphSky/mac.refurb.sh/main/main.sh)"
+curl -fsSL https://mac.refurb.sh | bash"
 ```
