@@ -37,6 +37,13 @@ chmod +x "${gum}" || {
 
 echo "INFO" "gum installed successfully"
 
+# Skip if miau volume is already mounted
+if [[ -d "/Volumes/miau" ]]; then
+  echo "INFO" "miau volume is already mounted"
+  export miau="/Volumes/miau"
+  exit 0
+fi
+
 echo "INFO" "Downloading miau.dmg..."
 if ! curl -L --connect-timeout 30 --retry 2 --retry-delay 3 \
       --progress-bar "${miau_dmg_url}" -o "${tmpdir}/miau.dmg"; then
