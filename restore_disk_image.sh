@@ -22,16 +22,6 @@ human_readable_size () {
     {sub(/^[0-9]+/, human($1)); print}'
 }
 
-check_asr_version () {
-  version=$(asr --version)
-  if [[ $version == "asr: version 622" ]]; then
-    echo "ERROR" "ASR version 622 is broken and cannot restore disk images. Please use another version of ASR."
-    exit 1
-  fi
-}
-
-check_asr_version
-
 # Fetch local disk images
 echo "INFO" "Scanning for local disk images... This may take a while."
 # "${gum}" spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
@@ -99,7 +89,7 @@ echo "INFO" "Starting disk restoration..."
 echo "INFO" "ASR Restore  |  Source: $source_image  |  Target: $target_disk (/Volumes/Macintosh HD)"
 diskutil eraseDisk APFS "Macintosh HD" "$target_disk"
 diskutil mountDisk "$target_disk"
-asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
+${miau}/usr/sbin/asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
 
 while IFS= read -r option; do
   case "$option" in

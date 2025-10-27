@@ -47,6 +47,7 @@ fi
 # Mount miau.dmg
 echo "INFO" "Mounting miau.dmg..."
 hdiutil attach "${tmpdir}/miau.dmg" -quiet
+export miau="/Volumes/miau"
 echo "INFO" "miau.dmg mounted successfully"
 
 return

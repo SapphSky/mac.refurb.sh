@@ -56,7 +56,7 @@ pick_local_disk_image () {
 }
 
 scan_disk_image () {
-  asr imagescan --source "$1"
+  ${miau}/usr/sbin/asr imagescan --source "$1"
   return 0
 }
 

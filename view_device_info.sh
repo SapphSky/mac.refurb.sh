@@ -2,7 +2,7 @@
 set -o errexit -o pipefail
 
 echo "INFO" "Running system profiler"
-system_profiler_path="/usr/sbin/system_profiler"
+system_profiler_path="${miau}/usr/sbin/system_profiler"
 
 if [ ! -x "$system_profiler_path" ]; then
   echo "ERROR" "System Profiler not found at $system_profiler_path"
