@@ -65,6 +65,7 @@ target_disk=$(echo "${device_disks[@]}" | "${gum}" choose --header "Select a tar
 # Choose post-restore options
 post_restore_options=$("${gum}" choose --header "Choose post-restore options:" --no-limit --selected="*" \
   "Clear NVRAM and SMC" \
+  "View Device Info" \
   "Reboot after installation" \
 )
 
@@ -95,6 +96,9 @@ while IFS= read -r option; do
   case "$option" in
     "Clear NVRAM and SMC")
       sh ./reset_nvram.sh
+      ;;
+    "View Device Info")
+      sh ./view_device_info.sh
       ;;
     "Reboot after installation")
       reboot

@@ -2,11 +2,11 @@
 set -o errexit -o pipefail
 
 echo "INFO" "Running system profiler"
-system_profiler_path="${miau}/usr/sbin/system_profiler"
+system_profiler_path="/usr/sbin/system_profiler"
 
 if [ ! -x "$system_profiler_path" ]; then
-  echo "ERROR" "System Profiler not found at $system_profiler_path"
   "${gum}" style --foreground "#red" "Error: System Profiler not found"
+  "${gum}" style --foreground "#red" "You will need to install MacOS first."
   sleep 2
   exit 0
 fi
