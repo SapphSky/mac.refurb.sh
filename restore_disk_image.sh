@@ -101,14 +101,15 @@ diskutil eraseDisk APFS "Macintosh HD" "$target_disk"
 diskutil mountDisk "$target_disk"
 asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
 
-# Perform post-restore options
-case $post_restore_options in
-  "Clear NVRAM and SMC")
-    sh ./reset_nvram.sh
-    ;;
-  "Reboot after installation")
-    reboot
-    ;;
-esac
+while IFS= read -r option; do
+  case "$option" in
+    "Clear NVRAM and SMC")
+      sh ./reset_nvram.sh
+      ;;
+    "Reboot after installation")
+      reboot
+      ;;
+  esac
+done <<< "$post_restore_options"
 
 exit 0
