@@ -59,7 +59,7 @@ fetch_local_disk_images () {
 
 fetch_remote_disk_images () {
   local manifest=$(curl -s "$disk_image_manifest")
-  echo "$manifest" | jq -r '.disk_images[] | select(.available == true) | .display_name + " " + .version + ":" + .filename'
+  echo "$manifest" | ${miau}/usr/bin/jq -r '.disk_images[] | select(.available == true) | .display_name + " " + .version + ":" + .filename'
   return 0
 }
 

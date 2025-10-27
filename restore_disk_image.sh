@@ -5,8 +5,8 @@ echo "INFO" "Running ASR Wizard..."
 
 device_info () {
   json=$(diskutil info -plist "$1" | plutil -convert json -o - -)
-  name=$(echo "$json" | jq '.MediaName')
-  size=$(echo "$json" | jq '.TotalSize' | human_readable_size)
+  name=$(echo "$json" | ${miau}/usr/bin/jq '.MediaName')
+  size=$(echo "$json" | ${miau}/usr/bin/jq '.TotalSize' | human_readable_size)
   echo "$name - $size ($1)//$1"
 }
 
