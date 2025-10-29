@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
-set -o errexit -o pipefail
+#!/usr/bin/bash
+set -euo pipefail
 
 echo "INFO" "Running ASR Wizard..."
 
 device_info () {
   json=$(diskutil info -plist "$1" | plutil -convert json -o - -)
-  name=$(echo "$json" | ${miau}/usr/bin/jq '.MediaName')
-  size=$(echo "$json" | ${miau}/usr/bin/jq '.TotalSize' | human_readable_size)
+  name=$(echo "$json" | jq '.MediaName')
+  size=$(echo "$json" | jq '.TotalSize' | human_readable_size)
   echo "$name - $size ($1)//$1"
 }
 
@@ -42,9 +42,8 @@ else
   echo "WARNING" "Could not determine model or compatability.csv not found."
 fi
 
-# Fetch local disk images
 echo "INFO" "Scanning for local disk images... This may take a while."
-# "${gum}" spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
+# gum spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
 disk_images=$(find / \
   -path "/Volumes/Macintosh HD" -prune -o \
   -path "/Applications" -prune -o \
@@ -64,7 +63,6 @@ disk_images=$(find / \
   -path "/Users" -prune -o \
   -type f -name '*.dmg' -print0 \
   2>/dev/null | tr '\0' '\n' || true)
-disk_images=$(printf '%s\n' "$disk_images")
 
 if [[ -z "$disk_images" ]]; then
   echo "INFO" "No disk images found."
@@ -72,31 +70,30 @@ if [[ -z "$disk_images" ]]; then
 fi
 
 # Select source disk image
-source_image=$(echo "$disk_images" | "${gum}" choose --header "Select a source disk image to restore:")
+source_image=$(echo "$disk_images" | gum choose --header "Select a source disk image to restore:")
 
 # Fetch local disk drives
 echo "INFO" "Scanning for local disk drives..."
-device_disks=($(for disk in $(diskutil list internal physical | grep -E "^/dev/disk[0-9]+" | cut -d' ' -f1); do device_info "$disk"; done | tr '\n' '\0'))
-device_disks=($(printf '%s\0' "${device_disks[@]}" | tr '\0' '\n'))
+device_disks=($(for disk in $(diskutil list physical | grep -E "^/dev/disk[0-9]+" | cut -d' ' -f1); do device_info "$disk"; done))
 
 # Select target disk drive
-target_disk=$(echo "${device_disks[@]}" | "${gum}" choose --header "Select a target disk to:" --label-delimiter "//")
+target_disk=$(echo "${device_disks[@]}" | gum choose --header "Select a target disk to:" --label-delimiter "//")
 
 # Choose post-restore options
-post_restore_options=$("${gum}" choose --header "Choose post-restore options:" --no-limit --selected="*" \
+post_restore_options=$(gum choose --header "Choose post-restore options:" --no-limit --selected="*" \
   "Clear NVRAM and SMC" \
   "View Device Info" \
   "Reboot after installation" \
 )
 
 # Confirm choices
-"${gum}" style --bold --padding 1 "Confirm disk restoration operation"
-"${gum}" style "I am about to run \"asr restore\" with the following parameters:"
-"${gum}" style "Source Disk Image: $source_image"
-"${gum}" style "Restore Target Disk: $target_disk"
-"${gum}" style "Post-restore options: $post_restore_options"
+gum style --bold --padding 1 "Confirm disk restoration operation"
+gum style "I am about to run \"asr restore\" with the following parameters:"
+gum style "Source Disk Image: $source_image"
+gum style "Restore Target Disk: $target_disk"
+gum style "Post-restore options: $post_restore_options"
 
-if ! "${gum}" confirm \
+if ! gum confirm \
 "Are you sure you want to proceed? This action cannot be undone." \
 --default="false" \
 --affirmative="Confirm" \
@@ -110,7 +107,7 @@ echo "INFO" "Starting disk restoration..."
 echo "INFO" "ASR Restore  |  Source: $source_image  |  Target: $target_disk (/Volumes/Macintosh HD)"
 diskutil eraseDisk APFS "Macintosh HD" "$target_disk"
 diskutil mountDisk "$target_disk"
-${miau}/usr/sbin/asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
+asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
 
 while IFS= read -r option; do
   case "$option" in
@@ -126,4 +123,4 @@ while IFS= read -r option; do
   esac
 done <<< "$post_restore_options"
 
-exit 0
+return 0

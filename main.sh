@@ -1,29 +1,44 @@
-#!/usr/bin/env bash
-set -o errexit -o pipefail
+#!/usr/bin/bash
+set -euo pipefail
 
-repository="https://github.com/SapphSky/mac.refurb.sh/archive/refs/heads/main.zip"
+readonly arch=$(uname -m)
+readonly os=$(uname -s)
 
-if [[ -z "$tmpdir" ]]; then
-  tmpdir=$(mktemp -d) || {
+if [[ "$EUID" -ne 0 ]]; then
+  echo "This script must be run as root."
+  exit 1
+fi
+
+if [[ "$os" != "Darwin" ]]; then
+  echo "This script is only supported on macOS."
+  exit 1
+fi
+
+if [[ -z "$tmp_directory" ]]; then
+  tmp_directory=$(mktemp -d) || {
     echo "ERROR" "Failed to create temporary directory"
     exit 1
   }
-  echo "INFO" "Created temporary directory: ${tmpdir}"
+  echo "INFO" "Created directory ${tmp_directory}"
 fi
 
-echo "INFO" "Downloading ${repository} to ${tmpdir}/mac.refurb.sh.zip"
+# Clone directory to tmp_directory
+readonly repository="https://github.com/SapphSky/mac.refurb.sh/archive/refs/heads/main.zip"
+
+echo "INFO" "Downloading ${repository} to ${tmp_directory}/mac.refurb.sh.zip"
 if ! curl -L --connect-timeout 30 --retry 2 --retry-delay 3 \
-      --progress-bar "${repository}" -o "${tmpdir}/mac.refurb.sh.zip"; then
+      --progress-bar "${repository}" -o "${tmp_directory}/mac.refurb.sh.zip"; then
   echo "ERROR" "Failed to download repository"
   exit 1
 fi
 
 echo "INFO" "Extracting..."
-if ! tar -xzf "${tmpdir}/mac.refurb.sh.zip" -C "${tmpdir}"; then
-  echo "ERROR" "Failed to extract repository"
+if ! tar -xzf "${tmp_directory}/mac.refurb.sh.zip" -C "${tmp_directory}"; then
+  echo "ERROR" "Couldn't extract repository."
   exit 1
 fi
 
-cd "${tmpdir}/mac.refurb.sh-main"
-sh ./entrypoint.sh
-exit 0
+cd "${tmp_directory}/mac.refurb.sh-main"
+
+source ./fetch_dependencies.sh
+source ./menu.sh

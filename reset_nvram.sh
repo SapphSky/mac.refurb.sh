@@ -8,4 +8,4 @@ echo "INFO" "Restoring System Management Controller to default settings..."
 pmset -a restoredefaults
 
 echo "INFO" "Done"
-exit 0
+return 0

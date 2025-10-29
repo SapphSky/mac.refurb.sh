@@ -1,24 +1,23 @@
-#!/usr/bin/env bash
-set -o errexit -o pipefail
+#!/usr/bin/bash
+set -euo pipefail
 
 echo "INFO" "Running system profiler"
 system_profiler_path="/usr/sbin/system_profiler"
 
-if [ ! -x "$system_profiler_path" ]; then
-  "${gum}" style --foreground "#red" "Error: System Profiler not found"
-  "${gum}" style --foreground "#red" "You will need to install MacOS first."
-  sleep 2
-  exit 0
+if [ ! -x "${system_profiler_path}" ]; then
+  gum style --foreground "#red" "Error: System Profiler not found. You will need to install macOS first."
+  sleep 1
+  return 1
 fi
 
 choice=$("${system_profiler_path}" -listDataTypes \
  | tail -n +2 \
- | "${gum}" choose \
+ | gum choose \
  --ordered \
  --header="Toggle system information to display. Default items are already selected." \
  --selected="SPHardwareDataType,SPMemoryDataType,SPDisplaysDataType,SPPowerDataType,SPStorageDataType" \
  --no-limit)
 
-"${gum}" spin --spinner jump --title "Gathering system information..." -- "$system_profiler_path" $choice | "${gum}" pager
+gum spin --spinner jump --title "Gathering system information..." -- "${system_profiler_path}" $choice | gum pager
 
-exit 0
+return 0
