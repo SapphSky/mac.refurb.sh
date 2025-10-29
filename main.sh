@@ -14,13 +14,11 @@ if [[ "$os" != "Darwin" ]]; then
   exit 1
 fi
 
-if [[ -z "$tmp_directory" ]]; then
-  tmp_directory=$(mktemp -d) || {
-    echo "ERROR" "Failed to create temporary directory"
-    exit 1
-  }
-  echo "INFO" "Created directory ${tmp_directory}"
-fi
+tmp_directory=$(mktemp -d) || {
+  echo "ERROR" "Failed to create temporary directory"
+  exit 1
+}
+echo "INFO" "Created directory ${tmp_directory}"
 
 # Clone directory to tmp_directory
 readonly repository="https://github.com/SapphSky/mac.refurb.sh/archive/refs/heads/main.zip"
