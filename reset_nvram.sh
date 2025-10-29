@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -o errexit -o pipefail
+#!/usr/bin/bash
+set -euo pipefail
 
 echo "INFO" "Clearing NVRAM..."
 nvram -c
