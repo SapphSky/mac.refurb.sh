@@ -6,36 +6,8 @@ echo "INFO" "Running Disk Image Manager..."
 readonly disk_image_repository="https://dl.refurb.sh/assets/disk_images/"
 readonly disk_image_manifest="${disk_image_repository}manifest.json"
 
-fetch_local_disk_images () {
-  # echo "INFO" "Scanning for local disk images... This may take a while."
-  # gum spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
-  disk_images=$(find / \
-    -path "/Volumes/Macintosh HD" -prune -o \
-    -path "/Applications" -prune -o \
-    -path "/Library" -prune -o \
-    -path "/System" -prune -o \
-    -path "/macOS Base System" -prune -o \
-    -path "/tmp" -prune -o \
-    -path "/bin" -prune -o \
-    -path "/cores" -prune -o \
-    -path "/etc" -prune -o \
-    -path "/opt" -prune -o \
-    -path "/private" -prune -o \
-    -path "/sbin" -prune -o \
-    -path "/usr" -prune -o \
-    -path "/var" -prune -o \
-    -path "/Users" -prune -o \
-    -type f -name '*.dmg' -print0 \
-    2>/dev/null | tr '\0' '\n' || true)
-  disk_images=$(printf '%s\n' "$disk_images")
-
-  if [[ -z "$disk_images" ]]; then
-    echo "INFO" "No disk images found."
-    return 0
-  fi
-
-  echo "$disk_images"
-}
+# Source shared disk image utilities
+source "$(dirname "$0")/disk_image_utils.sh"
 
 fetch_remote_disk_images () {
   local manifest=$(curl -s "$disk_image_manifest")
@@ -50,7 +22,7 @@ pick_remote_disk_image () {
 }
 
 pick_local_disk_image () {
-  local choice=$(fetch_local_disk_images | gum choose --header "Select a disk image:")
+  local choice=$(select_local_disk_image "Select a disk image:")
   echo "$choice"
   return 0
 }

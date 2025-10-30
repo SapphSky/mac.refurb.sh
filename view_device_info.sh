@@ -18,7 +18,8 @@ choice=$(echo "$datatypes" | gum choose \
   --ordered \
   --header="Toggle system information to display. Default items are already selected." \
   --selected="$default_selected" \
-  --no-limit
+  --no-limit \
+  --label-delimiter ":"
 )
 
 if [[ -z "$choice" ]]; then

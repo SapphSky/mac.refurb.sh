@@ -7,7 +7,7 @@ device_info () {
   json=$(diskutil info -plist "$1" | plutil -convert json -o - -)
   name=$(echo "$json" | jq -r '.MediaName')
   size=$(echo "$json" | jq '.TotalSize' | human_readable_size)
-  echo "$name - $size ($1)//$1"
+  echo "$name - $size ($1):$1"
 }
 
 human_readable_size () {
@@ -42,35 +42,11 @@ else
   echo "WARNING" "Could not determine model or compatibility.csv not found."
 fi
 
-echo "INFO" "Scanning for local disk images... This may take a while."
-# gum spin --spinner minidot --title "Scanning for local disk images... This may take a while." -- \
-disk_images=$(find / \
-  -path "/Volumes/Macintosh HD" -prune -o \
-  -path "/Applications" -prune -o \
-  -path "/Library" -prune -o \
-  -path "/System" -prune -o \
-  -path "/Users" -prune -o \
-  -path "/macOS Base System" -prune -o \
-  -path "/tmp" -prune -o \
-  -path "/bin" -prune -o \
-  -path "/cores" -prune -o \
-  -path "/etc" -prune -o \
-  -path "/opt" -prune -o \
-  -path "/private" -prune -o \
-  -path "/sbin" -prune -o \
-  -path "/usr" -prune -o \
-  -path "/var" -prune -o \
-  -path "/Users" -prune -o \
-  -type f -name '*.dmg' -print0 \
-  2>/dev/null | tr '\0' '\n' || true)
-
-if [[ -z "$disk_images" ]]; then
-  echo "INFO" "No disk images found."
-  return 0
-fi
+# Source shared disk image utilities
+source "$(dirname "$0")/disk_image_utils.sh"
 
 # Select source disk image
-source_image=$(echo "$disk_images" | gum choose --header "Select a source disk image to restore:")
+source_image=$(select_local_disk_image "Select a source disk image to restore:")
 
 if [[ -z "$source_image" ]]; then
   echo "INFO" "User cancelled disk image selection."
@@ -82,7 +58,7 @@ echo "INFO" "Scanning for local disk drives..."
 device_disks=$(for disk in $(diskutil list physical | grep -E "^/dev/disk[0-9]+" | cut -d' ' -f1); do device_info "$disk"; done)
 
 # Select target disk drive
-target_disk=$(echo "$device_disks" | gum choose --header "Select a target disk to restore:" --label-delimiter "//")
+target_disk=$(echo "$device_disks" | gum choose --header "Select a target disk to restore:" --label-delimiter ":")
 
 if [[ -z "$target_disk" ]]; then
   echo "INFO" "User cancelled target disk selection."
@@ -90,11 +66,11 @@ if [[ -z "$target_disk" ]]; then
 fi
 
 # Choose post-restore options
-post_restore_options=$(gum choose --header "Choose post-restore options:" --no-limit --selected="*" \
-  "Clear NVRAM and SMC" \
-  "View Device Info" \
-  "Reboot after installation" \
-) || true
+post_restore_options=$(printf "%s\n" \
+  "Clear NVRAM and SMC:clear_nvram" \
+  "Reboot after installation:reboot" \
+  "View Device Info:view_device_info" \
+| gum choose --header "Choose post-restore options:" --no-limit --label-delimiter ":" --selected="clear_nvram,reboot") || true
 
 if [[ -z "$post_restore_options" ]]; then
   echo "INFO" "No post-restore options selected."
@@ -105,7 +81,7 @@ gum style --bold --padding 1 "Confirm disk restoration operation"
 gum style "I am about to run \"asr restore\" with the following parameters:"
 gum style "Source Disk Image: $source_image"
 gum style "Restore Target Disk: $target_disk"
-gum style "Post-restore options: $post_restore_options"
+gum style "Post-restore options: $(echo "$post_restore_options" | tr '\n' ', ')"
 
 if ! gum confirm \
 "Are you sure you want to proceed? This action cannot be undone." \

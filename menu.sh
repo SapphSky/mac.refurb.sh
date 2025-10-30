@@ -27,12 +27,6 @@ case "$choice" in
       exit 1
     fi
     ;;
-  "install_tdm")
-    if ! source ./tdm_restore.sh; then
-      echo "ERROR" "Failed to run TDM restore script"
-      exit 1
-    fi
-    ;;
   "manage_images")
     if ! source ./dmg_manager.sh; then
       echo "ERROR" "Failed to run disk image manager"
