@@ -5,7 +5,7 @@ echo "INFO" "Running ASR Wizard..."
 
 device_info () {
   json=$(diskutil info -plist "$1" | plutil -convert json -o - -)
-  name=$(echo "$json" | jq '.MediaName')
+  name=$(echo "$json" | jq -r '.MediaName')
   size=$(echo "$json" | jq '.TotalSize' | human_readable_size)
   echo "$name - $size ($1)//$1"
 }
@@ -33,8 +33,8 @@ if [[ -f "compatability.csv" ]] && [[ -n "$model" ]]; then
     echo "WARNING" "No compatability data found for ${model}."
     echo "Please be aware of the compatible OS versions for this model."
   else
-    min_version=$(echo "$compatability" | awk '{print $1}')
-    max_version=$(echo "$compatability" | awk '{print $2}')
+    max_version=$(echo "$compatability" | awk '{print $1}')
+    min_version=$(echo "$compatability" | awk '{print $2}')
     echo "INFO" "Minimum OS version: ${min_version}"
     echo "INFO" "Maximum OS version: ${max_version}"
   fi
@@ -66,25 +66,39 @@ disk_images=$(find / \
 
 if [[ -z "$disk_images" ]]; then
   echo "INFO" "No disk images found."
-  exit 0
+  return 0
 fi
 
 # Select source disk image
 source_image=$(echo "$disk_images" | gum choose --header "Select a source disk image to restore:")
 
+if [[ -z "$source_image" ]]; then
+  echo "INFO" "User cancelled disk image selection."
+  return 0
+fi
+
 # Fetch local disk drives
 echo "INFO" "Scanning for local disk drives..."
-device_disks=($(for disk in $(diskutil list physical | grep -E "^/dev/disk[0-9]+" | cut -d' ' -f1); do device_info "$disk"; done))
+device_disks=$(for disk in $(diskutil list physical | grep -E "^/dev/disk[0-9]+" | cut -d' ' -f1); do device_info "$disk"; done)
 
 # Select target disk drive
-target_disk=$(echo "${device_disks[@]}" | gum choose --header "Select a target disk to:" --label-delimiter "//")
+target_disk=$(echo "$device_disks" | gum choose --header "Select a target disk to restore:" --label-delimiter "//")
+
+if [[ -z "$target_disk" ]]; then
+  echo "INFO" "User cancelled target disk selection."
+  return 0
+fi
 
 # Choose post-restore options
 post_restore_options=$(gum choose --header "Choose post-restore options:" --no-limit --selected="*" \
   "Clear NVRAM and SMC" \
   "View Device Info" \
   "Reboot after installation" \
-)
+) || true
+
+if [[ -z "$post_restore_options" ]]; then
+  echo "INFO" "No post-restore options selected."
+fi
 
 # Confirm choices
 gum style --bold --padding 1 "Confirm disk restoration operation"
@@ -99,28 +113,43 @@ if ! gum confirm \
 --affirmative="Confirm" \
 --negative="Cancel"; then
   echo "INFO" "User cancelled disk restoration."
-  exit 0
+  return 0
 fi
 
 # Restore disk image
 echo "INFO" "Starting disk restoration..."
 echo "INFO" "ASR Restore  |  Source: $source_image  |  Target: $target_disk (/Volumes/Macintosh HD)"
-diskutil eraseDisk APFS "Macintosh HD" "$target_disk"
-diskutil mountDisk "$target_disk"
-asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt
 
-while IFS= read -r option; do
-  case "$option" in
-    "Clear NVRAM and SMC")
-      sh ./reset_nvram.sh
-      ;;
-    "View Device Info")
-      sh ./view_device_info.sh
-      ;;
-    "Reboot after installation")
-      reboot
-      ;;
-  esac
-done <<< "$post_restore_options"
+if ! diskutil eraseDisk APFS "Macintosh HD" "$target_disk"; then
+  echo "ERROR" "Failed to erase disk."
+  return 1
+fi
+
+if ! diskutil mountDisk "$target_disk"; then
+  echo "ERROR" "Failed to mount disk."
+  return 1
+fi
+
+if ! asr restore --source "$source_image" --target "/Volumes/Macintosh HD" --erase --noprompt; then
+  echo "ERROR" "ASR restore failed."
+  return 1
+fi
+
+if [[ -n "$post_restore_options" ]]; then
+  while IFS= read -r option; do
+    [[ -z "$option" ]] && continue
+    case "$option" in
+      "Clear NVRAM and SMC")
+        sh ./reset_nvram.sh
+        ;;
+      "View Device Info")
+        sh ./view_device_info.sh
+        ;;
+      "Reboot after installation")
+        reboot
+        ;;
+    esac
+  done <<< "$post_restore_options"
+fi
 
 return 0
