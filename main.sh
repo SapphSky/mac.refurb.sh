@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 set -euo pipefail
 
-readonly arch="$(uname -m)"
-readonly os="$(uname -s)"
+readonly arch="$(uname -m || echo 'x86_64')"
+readonly os="$(uname -s || echo 'Darwin')"
 
 if [[ "$EUID" -ne 0 ]]; then
   echo "This script must be run as root."
