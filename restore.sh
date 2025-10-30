@@ -131,5 +131,3 @@ if [[ -n "$post_restore_options" ]]; then
     esac
   done <<< "$post_restore_options"
 fi
-
-return 0

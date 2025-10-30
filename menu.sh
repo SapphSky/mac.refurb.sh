@@ -51,4 +51,3 @@ case "$choice" in
 esac
 
 source ./menu.sh
-return 0
