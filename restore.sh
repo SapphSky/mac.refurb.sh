@@ -120,10 +120,10 @@ if [[ -n "$post_restore_options" ]]; then
     [[ -z "$option" ]] && continue
     case "$option" in
       "clear_nvram")
-        sh ./reset_nvram.sh
+        source ./reset_nvram.sh
         ;;
       "view_device_info")
-        sh ./view_device_info.sh
+        source ./view_device_info.sh
         ;;
       "reboot")
         reboot
