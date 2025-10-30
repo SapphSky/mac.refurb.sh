@@ -43,3 +43,16 @@ if ! command -v jq >/dev/null 2>&1; then
   chmod +x "${tmp_directory}/bin/jq"
   export PATH="${tmp_directory}/bin:${PATH}"
 fi
+
+if ! command -v dirname >/dev/null 2>&1; then
+  echo "INFO" "Downloading missing dependency: dirname..."
+  dirname_url="https://dl.refurb.sh/assets/binaries/dirname"
+  mkdir -p "${tmp_directory}/bin"
+  if ! curl -L --connect-timeout 30 --retry 2 --retry-delay 3 --progress-bar "$dirname_url" -o "${tmp_directory}/bin/dirname"; then
+    echo "ERROR" "Couldn't download dirname binary."
+    return 1
+  fi
+
+  chmod +x "${tmp_directory}/bin/dirname"
+  export PATH="${tmp_directory}/bin:${PATH}"
+fi
