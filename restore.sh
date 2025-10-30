@@ -65,15 +65,19 @@ if [[ -z "$target_disk" ]]; then
   return 0
 fi
 
-# Choose post-restore options
-post_restore_options=$(printf "%s\n" \
-  "Clear NVRAM and SMC:clear_nvram" \
-  "Reboot after installation:reboot" \
-  "View Device Info:view_device_info" \
-| gum choose --header "Choose post-restore options:" --no-limit --label-delimiter ":" --selected="clear_nvram,reboot") || true
+post_restore_options=""
+if [[ "$target_disk" == "/dev/disk0" ]]; then
+  post_restore_options=$(printf "%s\n" \
+    "Clear NVRAM and SMC:clear_nvram" \
+    "Reboot after installation:reboot" \
+    "View Device Info:view_device_info" \
+  | gum choose --header "Choose post-restore options:" --no-limit --label-delimiter ":" --selected="clear_nvram,reboot") || true
 
-if [[ -z "$post_restore_options" ]]; then
-  echo "INFO" "No post-restore options selected."
+  if [[ -z "$post_restore_options" ]]; then
+    echo "INFO" "No post-restore options selected."
+  fi
+else
+  echo "INFO" "Skipping post-restore options since target disk is not internal."
 fi
 
 # Confirm choices
