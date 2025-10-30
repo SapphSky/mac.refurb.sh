@@ -119,13 +119,13 @@ if [[ -n "$post_restore_options" ]]; then
   while IFS= read -r option; do
     [[ -z "$option" ]] && continue
     case "$option" in
-      "Clear NVRAM and SMC")
+      "clear_nvram")
         sh ./reset_nvram.sh
         ;;
-      "View Device Info")
+      "view_device_info")
         sh ./view_device_info.sh
         ;;
-      "Reboot after installation")
+      "reboot")
         reboot
         ;;
     esac
