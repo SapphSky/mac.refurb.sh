@@ -22,24 +22,24 @@ human_readable_size () {
     {sub(/^[0-9]+/, human($1)); print}'
 }
 
-echo "INFO" "Checking OS compatability..."
+echo "INFO" "Checking OS compatibility..."
 ioreg_output=$(ioreg -l 2>/dev/null || true)
 model=$(echo "$ioreg_output" | (grep ModelNumber -m 1 2>/dev/null || true) | awk -F'"' '{print $4}' || echo "")
 
-if [[ -f "compatability.csv" ]] && [[ -n "$model" ]]; then
-  compatability=$(grep -s "\"$model\"" compatability.csv 2>/dev/null | awk -F',' '{print $2, $3}' || true)
+if [[ -f "compatibility.csv" ]] && [[ -n "$model" ]]; then
+  compatibility=$(grep -s "\"$model\"" compatibility.csv 2>/dev/null | awk -F',' '{print $2, $3}' || true)
   
-  if [[ -z "$compatability" ]]; then
-    echo "WARNING" "No compatability data found for ${model}."
+  if [[ -z "$compatibility" ]]; then
+    echo "WARNING" "No compatibility data found for ${model}."
     echo "Please be aware of the compatible OS versions for this model."
   else
-    max_version=$(echo "$compatability" | awk '{print $1}')
-    min_version=$(echo "$compatability" | awk '{print $2}')
+    max_version=$(echo "$compatibility" | awk '{print $1}')
+    min_version=$(echo "$compatibility" | awk '{print $2}')
     echo "INFO" "Minimum OS version: ${min_version}"
     echo "INFO" "Maximum OS version: ${max_version}"
   fi
 else
-  echo "WARNING" "Could not determine model or compatability.csv not found."
+  echo "WARNING" "Could not determine model or compatibility.csv not found."
 fi
 
 echo "INFO" "Scanning for local disk images... This may take a while."
