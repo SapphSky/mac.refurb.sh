@@ -71,7 +71,7 @@ if [[ "$target_disk" == "/dev/disk0" ]]; then
     "Clear NVRAM and SMC:clear_nvram" \
     "Reboot after installation:reboot" \
     "View Device Info:view_device_info" \
-  | gum choose --header "Choose post-restore options:" --no-limit --label-delimiter ":" --selected "Clear NVRAM and SMC" "Reboot after installation") || true
+  | gum choose --header "Choose post-restore options:" --no-limit --label-delimiter ":" --selected "Clear NVRAM and SMC,Reboot after installation") || true
 
   if [[ -z "$post_restore_options" ]]; then
     echo "INFO" "No post-restore options selected."
